@@ -7,13 +7,14 @@
 #
 
 fs = require('fs')
-log = "/var/log/pianobar" 
-command = fs.createWriteStream('~/.config/pianobar/ctl', {'flags': 'a'})
+log = "/var/log/pianobar"
+command = HUBOT_PIANOBAR_COMMAND_FILE
 
 module.exports = (robot) ->
-  robot.respond /pianobar\s*(.*)?$/i, (msg) ->
-    command.write msg.match[1] + '\n'
+  robot.respond /pianobar\s+(.*)$/i, (msg) ->
+    fs.appendFile command, msg.match[1] + "\n", (err) ->
+      msg.send "I had a problem: " + msg.code if err
 
   fs.watchFile log, (prev, curr) ->
     fs.readFile log, "utf8", (err, body) ->
-      robot.send HUBOT_PIANOBAR_TARGET_JABBER_ID, body 
+      robot.send HUBOT_PIANOBAR_TARGET_JABBER_ID, body
